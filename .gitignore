@@ -2,7 +2,7 @@
 
 # compiled output
 /tmp
-
+/dist
 ## ngc logs
 *.ngfactory.ts
 *.ngsummary.json

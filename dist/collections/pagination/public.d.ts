@@ -1,1 +1,0 @@
-export { SuiPaginationModule } from "./internal";

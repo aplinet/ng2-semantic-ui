@@ -28,6 +28,7 @@ export class SuiCheckbox implements ICustomValueAccessorHost<boolean> {
     @Input()
     public name:string;
 
+    @Input('checked')
     @HostBinding("class.checked")
     public isChecked:boolean;
 
