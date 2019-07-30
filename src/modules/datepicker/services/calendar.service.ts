@@ -35,6 +35,7 @@ export class CalendarService {
     }
 
     public set selectedDate(date:Date | undefined) {
+      
         if (date) {
             this._selectedDate = DateUtil.clone(date);
             this.currentDate = DateUtil.clone(date);

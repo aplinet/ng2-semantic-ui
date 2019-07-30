@@ -1,45 +1,74 @@
+import { DateTime } from 'luxon';
 import {
-    Directive, ElementRef, Renderer2, EventEmitter, Output, Input,
-    HostListener, OnChanges, SimpleChanges
-} from "@angular/core";
-import { AbstractControl, ValidationErrors } from "@angular/forms";
+    Directive,
+    ElementRef,
+    Renderer2,
+    EventEmitter,
+    Output,
+    Input,
+    HostListener,
+    OnChanges,
+    SimpleChanges
+} from '@angular/core';
+import { AbstractControl, ValidationErrors } from '@angular/forms';
 import {
-    ICustomValueAccessorHost, customValueAccessorFactory, CustomValueAccessor,
-    ICustomValidatorHost, customValidatorFactory, CustomValidator, PositioningPlacement, SuiComponentFactory, KeyCode
-} from "../../../misc/util/internal";
-import { IDatepickerLocaleValues, RecursivePartial, SuiLocalizationService } from "../../../behaviors/localization/internal";
-import { SuiPopupComponentController, PopupAfterOpen, PopupConfig, PopupTrigger } from "../../popup/internal";
-import { SuiDatepicker, DatepickerMode } from "../components/datepicker";
-import { CalendarConfig, YearConfig, MonthConfig, DatetimeConfig, TimeConfig, DateConfig } from "../classes/calendar-config";
+    ICustomValueAccessorHost,
+    customValueAccessorFactory,
+    CustomValueAccessor,
+    ICustomValidatorHost,
+    customValidatorFactory,
+    CustomValidator,
+    PositioningPlacement,
+    SuiComponentFactory,
+    KeyCode
+} from '../../../misc/util/internal';
+import {
+    IDatepickerLocaleValues,
+    RecursivePartial,
+    SuiLocalizationService
+} from '../../../behaviors/localization/internal';
+import {
+    SuiPopupComponentController,
+    PopupAfterOpen,
+    PopupConfig,
+    PopupTrigger
+} from '../../popup/internal';
+import { SuiDatepicker, DatepickerMode } from '../components/datepicker';
+import {
+    CalendarConfig,
+    YearConfig,
+    MonthConfig,
+    DatetimeConfig,
+    TimeConfig,
+    DateConfig
+} from '../classes/calendar-config';
 
 @Directive({
-    selector: "[suiDatepicker]",
+    selector: '[suiDatepicker]',
     providers: [customValidatorFactory(SuiDatepickerDirective)]
 })
-export class SuiDatepickerDirective
-       extends SuiPopupComponentController<SuiDatepicker>
-       implements ICustomValueAccessorHost<Date>, ICustomValidatorHost, OnChanges, PopupAfterOpen {
+export class SuiDatepickerDirective extends SuiPopupComponentController<SuiDatepicker>
+    implements ICustomValueAccessorHost<Date>, ICustomValidatorHost, OnChanges, PopupAfterOpen {
+    private _selectedDate?: Date;
 
-    private _selectedDate?:Date;
-
-    public get selectedDate():Date | undefined {
+    public get selectedDate(): Date | undefined {
         return this._selectedDate;
     }
 
-    public set selectedDate(date:Date | undefined) {
+    public set selectedDate(date: Date | undefined) {
         this._selectedDate = date;
         this.onSelectedDateChange.emit(date);
     }
 
-    private _mode:DatepickerMode;
-    public config:CalendarConfig;
+    private _mode: DatepickerMode;
+    public config: CalendarConfig;
 
-    @Input("pickerMode")
-    public get mode():DatepickerMode {
+    @Input('pickerMode')
+    public get mode(): DatepickerMode {
         return this._mode;
     }
 
-    public set mode(mode:DatepickerMode) {
+    public set mode(mode: DatepickerMode) {
         this._mode = mode || DatepickerMode.Datetime;
         switch (this._mode) {
             case DatepickerMode.Year:
@@ -59,66 +88,76 @@ export class SuiDatepickerDirective
                 this.config = new TimeConfig();
                 break;
         }
-        this.writeValue(this.selectedDate);
+        this.writeValue(this.selectedDate as Date);
     }
 
-    @Input("pickerInitialDate")
-    public initialDate?:Date;
+    @Input('pickerInitialDate')
+    public initialDate?: Date;
 
-    @Input("pickerMaxDate")
-    public maxDate?:Date;
+    @Input('pickerMaxDate')
+    public maxDate?: Date;
 
-    @Input("pickerMinDate")
-    public minDate?:Date;
+    @Input('pickerMinDate')
+    public minDate?: Date;
 
-    @Input("pickerFirstDayOfWeek")
-    public firstDayOfWeek?:number;
+    @Input('pickerFirstDayOfWeek')
+    public firstDayOfWeek?: number;
 
-    private _localeValues:IDatepickerLocaleValues;
+    private _localeValues: IDatepickerLocaleValues;
 
-    @Input("pickerLocaleOverrides")
-    public localeOverrides:RecursivePartial<IDatepickerLocaleValues>;
+    @Input('pickerLocaleOverrides')
+    public localeOverrides: RecursivePartial<IDatepickerLocaleValues>;
 
-    public get localeValues():IDatepickerLocaleValues {
-        return this.localizationService.override<"datepicker">(this._localeValues, this.localeOverrides);
+    public get localeValues(): IDatepickerLocaleValues {
+        return this.localizationService.override<'datepicker'>(
+            this._localeValues,
+            this.localeOverrides
+        );
     }
 
-    @Input("pickerPlacement")
-    public set placement(placement:PositioningPlacement) {
+    @Input('pickerPlacement')
+    public set placement(placement: PositioningPlacement) {
         this.popup.config.placement = placement;
     }
 
-    @Input("pickerTransition")
-    public set transition(transition:string) {
+    @Input('pickerTransition')
+    public set transition(transition: string) {
         this.popup.config.transition = transition;
     }
 
-    @Input("pickerTransitionDuration")
-    public set transitionDuration(duration:number) {
+    @Input('pickerTransitionDuration')
+    public set transitionDuration(duration: number) {
         this.popup.config.transitionDuration = duration;
     }
 
-    @Output("pickerSelectedDateChange")
-    public onSelectedDateChange:EventEmitter<Date>;
+    @Output('pickerSelectedDateChange')
+    public onSelectedDateChange: EventEmitter<Date>;
 
-    @Output("pickerValidatorChange")
-    public onValidatorChange:EventEmitter<void>;
+    @Output('pickerValidatorChange')
+    public onValidatorChange: EventEmitter<void>;
 
-    constructor(renderer:Renderer2,
-                element:ElementRef,
-                componentFactory:SuiComponentFactory,
-                public localizationService:SuiLocalizationService) {
-
-        super(renderer, element, componentFactory, SuiDatepicker, new PopupConfig({
-            trigger: PopupTrigger.Focus,
-            placement: PositioningPlacement.BottomLeft,
-            transition: "scale",
-            transitionDuration: 200
-        }));
+    constructor(
+        renderer: Renderer2,
+        element: ElementRef,
+        componentFactory: SuiComponentFactory,
+        public localizationService: SuiLocalizationService
+    ) {
+        super(
+            renderer,
+            element,
+            componentFactory,
+            SuiDatepicker,
+            new PopupConfig({
+                trigger: PopupTrigger.Focus,
+                placement: PositioningPlacement.BottomLeft,
+                transition: 'scale',
+                transitionDuration: 200
+            })
+        );
 
         // This ensures the popup is drawn correctly (i.e. no border).
-        this._renderer.addClass(this.popup.elementRef.nativeElement, "ui");
-        this._renderer.addClass(this.popup.elementRef.nativeElement, "calendar");
+        this._renderer.addClass(this.popup.elementRef.nativeElement, 'ui');
+        this._renderer.addClass(this.popup.elementRef.nativeElement, 'calendar');
 
         this.onLocaleUpdate();
         this.localizationService.onLanguageUpdate.subscribe(() => this.onLocaleUpdate());
@@ -129,12 +168,12 @@ export class SuiDatepickerDirective
         this.mode = DatepickerMode.Datetime;
     }
 
-    public popupOnOpen():void {
+    public popupOnOpen(): void {
         if (this.componentInstance) {
             this.componentInstance.service.config = this.config;
             this.componentInstance.service.localeValues = this.localeValues;
             this.componentInstance.service.currentDate = this.initialDate || new Date();
-            this.componentInstance.service.selectedDate = this.selectedDate;
+            this.componentInstance.service.selectedDate = this.selectedDate as Date;
             this.componentInstance.service.maxDate = this.maxDate;
             this.componentInstance.service.minDate = this.minDate;
 
@@ -144,24 +183,24 @@ export class SuiDatepickerDirective
 
             this.componentInstance.service.reset();
 
-            this.componentInstance.service.onDateChange.subscribe((d:Date) => {
+            this.componentInstance.service.onDateChange.subscribe((d: Date) => {
                 this.selectedDate = d;
                 this.close();
             });
         }
     }
 
-    public ngOnChanges({ maxDate, minDate, mode }:SimpleChanges):void {
+    public ngOnChanges({ maxDate, minDate, mode }: SimpleChanges): void {
         if (maxDate || minDate || mode) {
             this.onValidatorChange.emit();
         }
     }
 
-    private onLocaleUpdate():void {
+    private onLocaleUpdate(): void {
         this._localeValues = this.localizationService.get().datepicker;
     }
 
-    public validate(c:AbstractControl):ValidationErrors | null {
+    public validate(c: AbstractControl): ValidationErrors | null {
         const value = c.value;
 
         if (value != undefined) {
@@ -180,7 +219,10 @@ export class SuiDatepickerDirective
         return null;
     }
 
-    public writeValue(value:Date | undefined):void {
+    public writeValue(value: Date | string | undefined): void {
+        if (typeof value === 'string') {
+            value = DateTime.fromISO(value).toJSDate();
+        }
         this.selectedDate = value;
 
         if (this.componentInstance) {
@@ -188,8 +230,8 @@ export class SuiDatepickerDirective
         }
     }
 
-    @HostListener("keydown", ["$event"])
-    public onKeyDown(e:KeyboardEvent):void {
+    @HostListener('keydown', ['$event'])
+    public onKeyDown(e: KeyboardEvent): void {
         if (e.keyCode === KeyCode.Escape) {
             this.close();
         }
@@ -197,19 +239,26 @@ export class SuiDatepickerDirective
 }
 
 @Directive({
-    selector: "[suiDatepicker]",
-    host: { "(pickerSelectedDateChange)": "onChange($event)" },
+    selector: '[suiDatepicker]',
+    host: { '(pickerSelectedDateChange)': 'onChange($event)' },
     providers: [customValueAccessorFactory(SuiDatepickerDirectiveValueAccessor)]
 })
-export class SuiDatepickerDirectiveValueAccessor extends CustomValueAccessor<Date, SuiDatepickerDirective> {
-    constructor(public host:SuiDatepickerDirective) { super(host); }
+export class SuiDatepickerDirectiveValueAccessor extends CustomValueAccessor<
+    Date,
+    SuiDatepickerDirective
+> {
+    constructor(public host: SuiDatepickerDirective) {
+        super(host);
+    }
 }
 
 @Directive({
-    selector: "[suiDatepicker]",
-    host: { "(pickerValidatorChange)": "onValidatorChange()" },
+    selector: '[suiDatepicker]',
+    host: { '(pickerValidatorChange)': 'onValidatorChange()' },
     providers: [customValidatorFactory(SuiDatepickerDirectiveValidator)]
 })
 export class SuiDatepickerDirectiveValidator extends CustomValidator<SuiDatepickerDirective> {
-    constructor(public host:SuiDatepickerDirective) { super(host); }
+    constructor(public host: SuiDatepickerDirective) {
+        super(host);
+    }
 }

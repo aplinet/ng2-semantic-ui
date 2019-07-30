@@ -21,7 +21,9 @@ interface ILocalizationValuesContainer {
     [name:string]:IPartialLocaleValues;
 }
 
-@Injectable()
+@Injectable({
+  providedIn:'root'
+})
 export class SuiLocalizationService {
     private _language:string;
 

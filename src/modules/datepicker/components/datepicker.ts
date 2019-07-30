@@ -39,6 +39,7 @@ export class SuiDatepicker {
     public service:CalendarService;
 
     constructor(localizationService:SuiLocalizationService) {
+      console.log('datepicker lang',localizationService.language);
         this.service = new CalendarService(new DatetimeConfig(), localizationService.get().datepicker);
 
         this.hasClasses = true;
