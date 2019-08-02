@@ -223,10 +223,10 @@ export class SuiDatepickerDirective extends SuiPopupComponentController<SuiDatep
         if (typeof value === 'string') {
             value = DateTime.fromISO(value).toJSDate();
         }
-        this.selectedDate = value;
+        this.selectedDate = value as Date;
 
         if (this.componentInstance) {
-            this.componentInstance.service.selectedDate = value;
+            this.componentInstance.service.selectedDate = value as Date;
         }
     }
 

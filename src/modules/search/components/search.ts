@@ -14,31 +14,7 @@ export interface IResultContext<T> extends ITemplateRefContext<T> {
 
 @Component({
     selector: "sui-search",
-    template: `
-<div class="ui input" [class.icon]="hasIcon" (click)="onClick($event)">
-    <input class="prompt" type="text" [attr.placeholder]="placeholder" autocomplete="off" [(ngModel)]="query">
-    <i *ngIf="hasIcon" class="search icon"></i>
-</div>
-<div class="results"
-     suiDropdownMenu
-     [menuTransition]="transition"
-     [menuTransitionDuration]="transitionDuration"
-     menuSelectedItemClass="active">
-
-    <sui-search-result *ngFor="let r of results"
-                       class="item"
-                       [value]="r"
-                       [query]="query"
-                       [formatter]="resultFormatter"
-                       [template]="resultTemplate"
-                       (click)="select(r)"></sui-search-result>
-
-    <div *ngIf="results.length == 0" class="message empty">
-        <div class="header">{{ localeValues.noResults.header }}</div>
-        <div class="description">{{ localeValues.noResults.message }}</div>
-    </div>
-</div>
-`,
+  templateUrl: './search.html',
     styles: [`
 /* Ensures results div has margin. */
 :host {
@@ -59,11 +35,14 @@ export class SuiSearch<T> implements AfterViewInit {
     @ViewChild(SuiDropdownMenu)
     private _menu:SuiDropdownMenu;
 
+    @Input()
+    public hasTransparentInput = false;
     // Sets the Semantic UI classes on the host element.
     // Doing it on the host enables use in menus etc.
+    @Input()
     @HostBinding("class.ui")
     @HostBinding("class.search")
-    public readonly hasClasses:boolean;
+    public hasClasses:boolean = true;
 
     @HostBinding("attr.tabindex")
     public readonly tabindex:number;
@@ -176,6 +155,8 @@ export class SuiSearch<T> implements AfterViewInit {
     // Stores the currently selected result.
     public selectedResult?:T;
 
+    @Output('inputFocus')
+    public onInputFocus:EventEmitter<FocusEvent> = new EventEmitter();
     // Emits whenever a new result is selected.
     @Output("resultSelected")
     public onResultSelected:EventEmitter<T>;
@@ -193,7 +174,6 @@ export class SuiSearch<T> implements AfterViewInit {
         this.onLocaleUpdate();
         this._localizationService.onLanguageUpdate.subscribe(() => this.onLocaleUpdate());
 
-        this.hasClasses = true;
         this.tabindex = 0;
         this.hasIcon = true;
         this.retainSelectedResult = true;
@@ -231,8 +211,9 @@ export class SuiSearch<T> implements AfterViewInit {
         this.open();
     }
 
-    @HostListener("focusin")
-    public onFocusIn():void {
+    @HostListener("focusin",['$event'])
+    public onFocusIn($event):void {
+        this.onInputFocus.next($event);
         if (!this.dropdownService.isAnimating) {
             this.open();
         }
@@ -247,7 +228,6 @@ export class SuiSearch<T> implements AfterViewInit {
 
     @HostListener("focusout", ["$event"])
     public onFocusOut(e:IFocusEvent):void {
-        console.log(e);
         if (!this._element.nativeElement.contains(e.relatedTarget)) {
             this.dropdownService.setOpenState(false);
         }

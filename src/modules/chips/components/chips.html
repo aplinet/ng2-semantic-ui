@@ -1,0 +1,6 @@
+<a class="ui label" *ngFor="let chip of chips;let i = index" [ngClass]="{'active': activeChipIndex === i}">
+    {{chip}}
+    <i class="delete icon" (click)="deleteChip(i)"></i>
+</a>
+<sui-search placeholder="" [hasTransparentInput]="true"  [hasIcon]="false" [options]="options" [searchDelay]="searchDelay" (keydown)="searchKeyDown($event)"
+    (resultSelected)="resultSelected($event)" (inputFocus)="onSearchFocus($event)"></sui-search>

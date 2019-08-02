@@ -9,6 +9,7 @@ export * from "./popup/internal";
 export * from "./progress/internal";
 export * from "./rating/internal";
 export * from "./search/internal";
+export * from "./chips/internal";
 export * from "./select/internal";
 export * from "./sidebar/internal";
 export * from "./tabs/internal";
