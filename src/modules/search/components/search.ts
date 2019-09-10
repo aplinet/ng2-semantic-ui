@@ -52,6 +52,11 @@ export class SuiSearch<T> implements AfterViewInit {
         return this.dropdownService.isOpen;
     }
 
+    @Output('onBlur') public onBlurEmitter: EventEmitter<FocusEvent> = new EventEmitter<FocusEvent>();
+
+    public onBlur($event:FocusEvent){
+        this.onBlurEmitter.emit($event);
+    }
     // Sets whether the search element has a visible search icon.
     @Input()
     public hasIcon:boolean;
