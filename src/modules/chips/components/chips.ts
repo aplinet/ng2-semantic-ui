@@ -41,6 +41,8 @@ export class SuiChips implements OnInit, ControlValueAccessor {
 
     @Output('resultSelected')
     public onResultSelected: EventEmitter<string> = new EventEmitter();
+    @Output('focus')
+    public onFocusEmitter: EventEmitter<any> = new EventEmitter();
 
     @HostBinding('class.ui')
     @HostBinding('class.selection')
@@ -65,7 +67,6 @@ export class SuiChips implements OnInit, ControlValueAccessor {
     }
     parseChipInput(force = false) {
         const split = this.search.query.split(/[, ]+/);
-        console.log('split',split);
         if (split.length > 1 || force) {
             split.forEach((chip) => {
                 this.addChip(chip);
@@ -78,6 +79,9 @@ export class SuiChips implements OnInit, ControlValueAccessor {
         this.parseChipInput();
     }
 
+    onInputFocus($event:FocusEvent){
+      this.onFocusEmitter.emit($event);
+    }
     onInputBlur($event:FocusEvent){
         const relatedTarget = $event.relatedTarget as HTMLElement;
         if (!(relatedTarget && relatedTarget.classList.contains('ui') && relatedTarget.classList.contains('search'))){

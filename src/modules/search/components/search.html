@@ -4,7 +4,7 @@
     <i *ngIf="hasIcon" class="search icon"></i>
 </div>
 <ng-container *ngIf="hasTransparentInput">
-    <input class="search" type="text"  (click)="onClick($event)" [attr.placeholder]="placeholder" autocomplete="off"  [(ngModel)]="query" (blur)="onBlur($event)">
+    <input class="search" type="text"  (click)="onClick($event)" [attr.placeholder]="placeholder" autocomplete="off"  [(ngModel)]="query" (blur)="onBlur($event)" (focus)="onFocus($event)">
 </ng-container>
 <div class="results"
      suiDropdownMenu

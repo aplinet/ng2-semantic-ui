@@ -2,5 +2,5 @@
     {{chip}}
     <i class="delete icon" (click)="deleteChip(i)"></i>
 </a>
-<sui-search placeholder="" [hasTransparentInput]="true"  [hasIcon]="false" [options]="options" [searchDelay]="searchDelay" (keydown)="onKeyDown($event)" (input)="onInput($event)" (onBlur)="onInputBlur($event)"
+<sui-search placeholder="" [hasTransparentInput]="true"  [hasIcon]="false" [options]="options" [searchDelay]="searchDelay" (keydown)="onKeyDown($event)" (input)="onInput($event)" (onFocus)="onInputFocus($event)" (onBlur)="onInputBlur($event)"
     (resultSelected)="resultSelected($event)" (inputFocus)="onSearchFocus($event)"></sui-search>
