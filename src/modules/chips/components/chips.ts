@@ -41,12 +41,14 @@ export class SuiChips implements OnInit, ControlValueAccessor {
 
     @Output('resultSelected')
     public onResultSelected: EventEmitter<string> = new EventEmitter();
+    @Output('focus')
+    public onFocusEmitter: EventEmitter<any> = new EventEmitter();
 
-    @HostBinding("class.ui")
-    @HostBinding("class.selection")
-    @HostBinding("class.dropdown")
-    @HostBinding("class.search")
-    public readonly hasClasses:boolean = true;
+    @HostBinding('class.ui')
+    @HostBinding('class.selection')
+    @HostBinding('class.dropdown')
+    @HostBinding('class.search')
+    public readonly hasClasses: boolean = true;
 
     ngOnInit() {}
 
@@ -55,22 +57,49 @@ export class SuiChips implements OnInit, ControlValueAccessor {
         this.search.query = '';
         this.onResultSelected.next($event);
     }
-    searchKeyDown($event: KeyboardEvent) {
+    activateLastChip() {
+        if (this.activeChipIndex !== null) {
+            this.deleteChip(this.activeChipIndex);
+            this.activeChipIndex = null;
+        } else {
+            this.activeChipIndex = this.getLastChip();
+        }
+    }
+    parseChipInput(force = false) {
+        const split = this.search.query.split(/[, ]+/);
+        if (split.length > 1 || force) {
+            split.forEach((chip) => {
+                this.addChip(chip);
+            });
+            this.search.query = '';
+        }
+    }
+    onInput($event: any) {
+        console.log('input',$event);
+        this.parseChipInput();
+    }
+
+    onInputFocus($event:FocusEvent){
+      this.onFocusEmitter.emit($event);
+    }
+    onInputBlur($event:FocusEvent){
+        const relatedTarget = $event.relatedTarget as HTMLElement;
+        if (!(relatedTarget && relatedTarget.classList.contains('ui') && relatedTarget.classList.contains('search'))){
+            this.parseChipInput(true);
+        } 
+    }
+    onKeyDown($event: KeyboardEvent) {
+        this.parseChipInput();
+
+        // 229 mobile space
         switch ($event.key) {
             case 'Enter':
-            case ',':
-                this.addChip(this.search.query);
-                this.search.query = '';
+                this.parseChipInput(true);
                 $event.preventDefault();
                 break;
             case 'Backspace':
                 if (this.search.query === '') {
-                    if (this.activeChipIndex !== null) {
-                        this.deleteChip(this.activeChipIndex);
-                        this.activeChipIndex = null;
-                    } else {
-                        this.activeChipIndex = this.getLastChip();
-                    }
+                    this.activateLastChip();
                 }
                 break;
             default:
