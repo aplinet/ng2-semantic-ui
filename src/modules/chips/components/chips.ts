@@ -33,6 +33,8 @@ export class SuiChips implements OnInit, ControlValueAccessor {
     search: SuiSearch<string>;
 
     @Input()
+    forbiddenCharacters: string[] = [];
+    @Input()
     options: string[];
     @Input()
     searchDelay: number;
@@ -75,18 +77,29 @@ export class SuiChips implements OnInit, ControlValueAccessor {
         }
     }
     onInput($event: any) {
-        console.log('input',$event);
+        if (Array.isArray(this.forbiddenCharacters) && this.forbiddenCharacters.length) {
+            for (let i = 0; i < this.forbiddenCharacters.length; i++) {
+                const character = this.forbiddenCharacters[i];
+                this.search.query = this.search.query.replace(character, '');
+            }
+        }
         this.parseChipInput();
     }
 
-    onInputFocus($event:FocusEvent){
-      this.onFocusEmitter.emit($event);
+    onInputFocus($event: FocusEvent) {
+        this.onFocusEmitter.emit($event);
     }
-    onInputBlur($event:FocusEvent){
+    onInputBlur($event: FocusEvent) {
         const relatedTarget = $event.relatedTarget as HTMLElement;
-        if (!(relatedTarget && relatedTarget.classList.contains('ui') && relatedTarget.classList.contains('search'))){
+        if (
+            !(
+                relatedTarget &&
+                relatedTarget.classList.contains('ui') &&
+                relatedTarget.classList.contains('search')
+            )
+        ) {
             this.parseChipInput(true);
-        } 
+        }
     }
     onKeyDown($event: KeyboardEvent) {
         this.parseChipInput();
