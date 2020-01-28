@@ -88,9 +88,15 @@ export class SearchService<T, U> {
                 // This avoids the results suddenly becoming empty if an invalid regex string is inputted.
                 return os
                     // Filter on the options with a string match on the field we are testing.
-                    .filter(o => Util.Object.readValue<T, string>(o, this._optionsField)
+                    .filter(o => {
+                      const value = Util.Object.readValue<T, string>(o, this._optionsField);
+                      // if (typeof value === 'undefined'){
+                      //   return false;
+                      // }
+                      return value
                         .toString()
-                        .match(regex));
+                        .match(regex)
+                    } );
             }
 
             // Don't update since it wasn't a valid regex.
