@@ -20,7 +20,7 @@
                        [template]="resultTemplate"
                        (click)="select(r)"></sui-search-result>
 
-    <div *ngIf="results.length == 0" class="message empty">
+    <div *ngIf="results.length == 0 && !hideNoResults" class="message empty">
         <div class="header">{{ localeValues.noResults.header }}</div>
         <div class="description">{{ localeValues.noResults.message }}</div>
     </div>

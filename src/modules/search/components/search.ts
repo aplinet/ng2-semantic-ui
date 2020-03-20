@@ -36,6 +36,8 @@ export class SuiSearch<T> implements AfterViewInit {
     private _menu:SuiDropdownMenu;
 
     @Input()
+    hideNoResults = false;
+    @Input()
     public hasTransparentInput = false;
     // Sets the Semantic UI classes on the host element.
     // Doing it on the host enables use in menus etc.
@@ -93,9 +95,10 @@ export class SuiSearch<T> implements AfterViewInit {
     public set query(query:string) {
         this.selectedResult = undefined;
         // Initialise a delayed search.
-        this.searchService.updateQueryDelayed(query, () =>
+        this.searchService.updateQueryDelayed(query, () =>{
             // Set the results open state depending on whether a query has been entered.
-            this.dropdownService.setOpenState(this.searchService.query.length > 0));
+            this.dropdownService.setOpenState(this.searchService.query.length > 0)
+        });
     }
 
     @Input()
@@ -159,6 +162,9 @@ export class SuiSearch<T> implements AfterViewInit {
     public maxResults:number;
 
     public get results():T[] {
+        if (this.dropdownService.isOpen && this.hideNoResults && this.searchService.results.length===0){
+            this.dropdownService.setOpenState(false);
+        }
         return this.searchService.results.slice(0, this.maxResults);
     }
 
