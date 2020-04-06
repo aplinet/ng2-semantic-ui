@@ -1,39 +1,55 @@
 import {
-    Component, ViewChild, HostBinding, Input, AfterViewInit, HostListener,
-    EventEmitter, Output, Directive, ElementRef, TemplateRef, Renderer2
-} from "@angular/core";
-import { Util, ITemplateRefContext, IFocusEvent } from "../../../misc/util/internal";
-import { DropdownService, SuiDropdownMenu } from "../../dropdown/internal";
-import { ISearchLocaleValues, RecursivePartial, SuiLocalizationService } from "../../../behaviors/localization/internal";
-import { SearchService } from "../services/search.service";
-import { LookupFn, FilterFn } from "../helpers/lookup-fn";
+    Component,
+    ViewChild,
+    HostBinding,
+    Input,
+    AfterViewInit,
+    HostListener,
+    EventEmitter,
+    Output,
+    Directive,
+    ElementRef,
+    TemplateRef,
+    Renderer2
+} from '@angular/core';
+import { Util, ITemplateRefContext, IFocusEvent } from '../../../misc/util/internal';
+import { DropdownService, SuiDropdownMenu } from '../../dropdown/internal';
+import {
+    ISearchLocaleValues,
+    RecursivePartial,
+    SuiLocalizationService
+} from '../../../behaviors/localization/internal';
+import { SearchService } from '../services/search.service';
+import { LookupFn, FilterFn } from '../helpers/lookup-fn';
 
 export interface IResultContext<T> extends ITemplateRefContext<T> {
-    query:string;
+    query: string;
 }
 
 @Component({
-    selector: "sui-search",
-  templateUrl: './search.html',
-    styles: [`
-/* Ensures results div has margin. */
-:host {
-    display: inline-block;
-    outline: 0;
-}
+    selector: 'sui-search',
+    templateUrl: './search.html',
+    styles: [
+        `
+            /* Ensures results div has margin. */
+            :host {
+                display: inline-block;
+                outline: 0;
+            }
 
-/* Fixes positioning when results are pushed above the search. */
-.results {
-    margin-bottom: .5em;
-}
-`]
+            /* Fixes positioning when results are pushed above the search. */
+            .results {
+                margin-bottom: 0.5em;
+            }
+        `
+    ]
 })
 export class SuiSearch<T> implements AfterViewInit {
-    public dropdownService:DropdownService;
-    public searchService:SearchService<T, T>;
+    public dropdownService: DropdownService;
+    public searchService: SearchService<T, T>;
 
     @ViewChild(SuiDropdownMenu)
-    private _menu:SuiDropdownMenu;
+    private _menu: SuiDropdownMenu;
 
     @Input()
     hideNoResults = false;
@@ -42,148 +58,164 @@ export class SuiSearch<T> implements AfterViewInit {
     // Sets the Semantic UI classes on the host element.
     // Doing it on the host enables use in menus etc.
     @Input()
-    @HostBinding("class.ui")
-    @HostBinding("class.search")
-    public hasClasses:boolean = true;
+    @HostBinding('class.ui')
+    @HostBinding('class.search')
+    public hasClasses: boolean = true;
 
-    @HostBinding("attr.tabindex")
-    public readonly tabindex:number;
+    @HostBinding('attr.tabindex')
+    public readonly tabindex: number;
 
-    @HostBinding("class.active")
-    public get isActive():boolean {
+    @HostBinding('class.active')
+    public get isActive(): boolean {
         return this.dropdownService.isOpen;
     }
+    @ViewChild('input')
+    inputElement: ElementRef;
+    @Output('onFocus') public onFocusEmitter: EventEmitter<FocusEvent> = new EventEmitter<
+        FocusEvent
+    >();
 
-    @Output('onFocus') public onFocusEmitter: EventEmitter<FocusEvent> = new EventEmitter<FocusEvent>();
-
-    public onFocus($event:FocusEvent){
+    public onFocus($event: FocusEvent) {
         this.onFocusEmitter.emit($event);
     }
-    @Output('onBlur') public onBlurEmitter: EventEmitter<FocusEvent> = new EventEmitter<FocusEvent>();
+    @Output('onBlur') public onBlurEmitter: EventEmitter<FocusEvent> = new EventEmitter<
+        FocusEvent
+    >();
 
-    public onBlur($event:FocusEvent){
+    public onBlur($event: FocusEvent) {
         this.onBlurEmitter.emit($event);
     }
     // Sets whether the search element has a visible search icon.
     @Input()
-    public hasIcon:boolean;
+    public hasIcon: boolean;
 
-    private _placeholder:string;
+    private _placeholder: string;
 
     // Gets & sets the placeholder text displayed inside the text input.
     @Input()
-    public get placeholder():string {
+    public get placeholder(): string {
         return this._placeholder || this.localeValues.placeholder;
     }
 
-    public set placeholder(placeholder:string) {
+    public set placeholder(placeholder: string) {
         this._placeholder = placeholder;
     }
 
-    private _localeValues:ISearchLocaleValues;
+    private _localeValues: ISearchLocaleValues;
 
-    public localeOverrides:RecursivePartial<ISearchLocaleValues>;
+    public localeOverrides: RecursivePartial<ISearchLocaleValues>;
 
-    public get localeValues():ISearchLocaleValues {
-        return this._localizationService.override<"search">(this._localeValues, this.localeOverrides);
+    public get localeValues(): ISearchLocaleValues {
+        return this._localizationService.override<'search'>(
+            this._localeValues,
+            this.localeOverrides
+        );
     }
 
-    public get query():string {
+    public get query(): string {
         return this.searchService.query;
     }
 
-    public set query(query:string) {
+    public set query(query: string) {
         this.selectedResult = undefined;
         // Initialise a delayed search.
-        this.searchService.updateQueryDelayed(query, () =>{
+        this.searchService.updateQueryDelayed(query, () => {
             // Set the results open state depending on whether a query has been entered.
-            this.dropdownService.setOpenState(this.searchService.query.length > 0)
+            this.dropdownService.setOpenState(this.searchService.query.length > 0);
         });
     }
 
     @Input()
-    public set options(options:T[] | undefined) {
+    public set options(options: T[] | undefined) {
         if (options) {
             this.searchService.options = options;
         }
     }
 
     @Input()
-    public set optionsFilter(filter:FilterFn<T> | undefined) {
+    public set optionsFilter(filter: FilterFn<T> | undefined) {
         if (filter) {
             this.searchService.optionsFilter = filter;
         }
     }
 
     @Input()
-    public set optionsLookup(lookupFn:LookupFn<T> | undefined) {
+    public set optionsLookup(lookupFn: LookupFn<T> | undefined) {
         this.searchService.optionsLookup = lookupFn;
     }
 
     @Input()
-    public set optionsField(field:string | undefined) {
+    public set optionsField(field: string | undefined) {
         this.searchService.optionsField = field;
     }
 
-    private _resultFormatter?:(r:T, q:string) => string;
+    private _resultFormatter?: (r: T, q: string) => string;
 
-    public get resultFormatter():(result:T, query:string) => string {
+    public get resultFormatter(): (result: T, query: string) => string {
         if (this._resultFormatter) {
             return this._resultFormatter;
         } else if (this.searchService.optionsLookup) {
-            return r => this.readValue(r);
+            return (r) => this.readValue(r);
         } else {
             return (r, q) => this.searchService.highlightMatches(this.readValue(r), q);
         }
     }
 
     @Input()
-    public set resultFormatter(formatter:(result:T, query:string) => string) {
+    public set resultFormatter(formatter: (result: T, query: string) => string) {
         this._resultFormatter = formatter;
     }
 
     @Input()
-    public resultTemplate:TemplateRef<IResultContext<T>>;
+    public resultTemplate: TemplateRef<IResultContext<T>>;
 
     @Input()
-    public retainSelectedResult:boolean;
+    public retainSelectedResult: boolean;
 
     @Input()
-    public set searchDelay(delay:number) {
+    public set searchDelay(delay: number) {
         this.searchService.searchDelay = delay;
     }
 
-    @HostBinding("class.loading")
-    public get isSearching():boolean {
+    @HostBinding('class.loading')
+    public get isSearching(): boolean {
         return this.searchService.isSearching;
     }
 
     @Input()
-    public maxResults:number;
+    public maxResults: number;
 
-    public get results():T[] {
-        if (this.dropdownService.isOpen && this.hideNoResults && this.searchService.results.length===0){
+    public get results(): T[] {
+        if (
+            this.dropdownService.isOpen &&
+            this.hideNoResults &&
+            this.searchService.results.length === 0
+        ) {
             this.dropdownService.setOpenState(false);
         }
         return this.searchService.results.slice(0, this.maxResults);
     }
 
     // Stores the currently selected result.
-    public selectedResult?:T;
+    public selectedResult?: T;
 
     @Output('inputFocus')
-    public onInputFocus:EventEmitter<FocusEvent> = new EventEmitter();
+    public onInputFocus: EventEmitter<FocusEvent> = new EventEmitter();
     // Emits whenever a new result is selected.
-    @Output("resultSelected")
-    public onResultSelected:EventEmitter<T>;
+    @Output('resultSelected')
+    public onResultSelected: EventEmitter<T>;
 
     @Input()
-    public transition:string;
+    public transition: string;
 
     @Input()
-    public transitionDuration:number;
+    public transitionDuration: number;
 
-    constructor(private _element:ElementRef, renderer:Renderer2, private _localizationService:SuiLocalizationService) {
+    constructor(
+        private _element: ElementRef,
+        renderer: Renderer2,
+        private _localizationService: SuiLocalizationService
+    ) {
         this.dropdownService = new DropdownService();
         this.searchService = new SearchService<T, T>();
 
@@ -198,20 +230,20 @@ export class SuiSearch<T> implements AfterViewInit {
 
         this.onResultSelected = new EventEmitter<T>();
 
-        this.transition = "scale";
+        this.transition = 'scale';
         this.transitionDuration = 200;
     }
 
-    public ngAfterViewInit():void {
+    public ngAfterViewInit(): void {
         this._menu.service = this.dropdownService;
     }
 
-    private onLocaleUpdate():void {
+    private onLocaleUpdate(): void {
         this._localeValues = this._localizationService.get().search;
     }
 
     // Selects a result.
-    public select(result:T):void {
+    public select(result: T): void {
         this.onResultSelected.emit(result);
         this.dropdownService.setOpenState(false);
 
@@ -219,38 +251,38 @@ export class SuiSearch<T> implements AfterViewInit {
             this.selectedResult = result;
             this.searchService.updateQuery(this.readValue(result));
         } else {
-            this.searchService.updateQuery("");
+            this.searchService.updateQuery('');
         }
     }
 
-    public onClick(e:MouseEvent):void {
+    public onClick(e: MouseEvent): void {
         this.open();
     }
 
-    @HostListener("focusin",['$event'])
-    public onFocusIn($event):void {
+    @HostListener('focusin', ['$event'])
+    public onFocusIn($event): void {
         this.onInputFocus.next($event);
         if (!this.dropdownService.isAnimating) {
             this.open();
         }
     }
 
-    private open():void {
+    private open(): void {
         if (this.searchService.query.length > 0) {
             // Only open on click when there is a query entered.
             this.dropdownService.setOpenState(true);
         }
     }
 
-    @HostListener("focusout", ["$event"])
-    public onFocusOut(e:IFocusEvent):void {
+    @HostListener('focusout', ['$event'])
+    public onFocusOut(e: IFocusEvent): void {
         if (!this._element.nativeElement.contains(e.relatedTarget)) {
             this.dropdownService.setOpenState(false);
         }
     }
 
     // Reads the specified field from an item.
-    public readValue(object:T):string {
+    public readValue(object: T): string {
         return Util.Object.readValue<T, string>(object, this.searchService.optionsField);
     }
 }
