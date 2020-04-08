@@ -116,8 +116,12 @@ export class SuiSearch<T> implements AfterViewInit {
         return this.searchService.query;
     }
 
+    @Output('query')
+    queryEmitter: EventEmitter<string> = new EventEmitter();
+
     public set query(query: string) {
         this.selectedResult = undefined;
+        this.queryEmitter.emit(query);
         // Initialise a delayed search.
         this.searchService.updateQueryDelayed(query, () => {
             // Set the results open state depending on whether a query has been entered.
